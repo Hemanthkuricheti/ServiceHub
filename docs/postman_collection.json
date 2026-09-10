@@ -1,0 +1,273 @@
+{
+  "info": {
+    "name": "Service Provider Onboarding Portal",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "token", "value": "" },
+    { "key": "providerId", "value": "" },
+    { "key": "notificationId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Provider)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Provider\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Google Sign-In",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"<Google ID token from the frontend's Sign in with Google button>\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/google",
+            "description": "Verifies a Google ID token, logs in (linking to an existing account by email if one exists) or creates a new provider account. Requires GOOGLE_CLIENT_ID to be configured on the server."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Provider",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/provider/profile"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categories\": [\"Plumbing\", \"Electrical\"],\n  \"skills\": [\"Pipe Fitting\", \"Wiring\"],\n  \"experienceYears\": 5,\n  \"location\": {\n    \"address\": \"12 MG Road\",\n    \"city\": \"Bengaluru\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"560001\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/provider/profile"
+          }
+        },
+        {
+          "name": "Upload Profile Photo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "photo", "type": "file", "src": [] }]
+            },
+            "url": "{{baseUrl}}/provider/profile/photo"
+          }
+        },
+        {
+          "name": "Remove Profile Photo",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/provider/profile/photo",
+            "description": "Removable anytime, even after approval - unlike the rest of the profile, which locks once approved."
+          }
+        },
+        {
+          "name": "Upload Document (Aadhar Card)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "document", "type": "file", "src": [] },
+                { "key": "type", "type": "text", "value": "aadharCard" }
+              ]
+            },
+            "url": "{{baseUrl}}/provider/profile/documents"
+          }
+        },
+        {
+          "name": "Remove Document",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/provider/profile/documents/:docId"
+          }
+        },
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/provider/submit"
+          }
+        },
+        {
+          "name": "AI: Suggest Categories & Skills",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"I fix leaky pipes and install water heaters\",\n  \"category\": \"Plumbing\"\n}"
+            },
+            "url": "{{baseUrl}}/provider/ai/suggest",
+            "description": "Both fields are optional but at least one is required. `category` narrows the suggested skills to that category and can be used alone, without a description."
+          }
+        },
+        {
+          "name": "AI: Verify Document",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/provider/profile/documents/:docId/ai-verify"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/admin/stats"
+          }
+        },
+        {
+          "name": "List Providers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/admin/providers?search=&status=&category=&page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get Provider By Id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}"
+          }
+        },
+        {
+          "name": "Approve Provider",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}/approve"
+          }
+        },
+        {
+          "name": "Reject Provider",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Documents are unclear, please re-upload.\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}/reject"
+          }
+        },
+        {
+          "name": "AI: Application Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}/ai-summary"
+          }
+        },
+        {
+          "name": "AI: Draft Rejection Remarks",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"ID photo is blurry\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}/ai-draft-rejection"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/notifications",
+            "description": "Works for both providers and admins - returns the caller's own latest 20 notifications plus their unread count. Notifications are created when an application is submitted (to the provider and every admin) and when it's approved/rejected (to the provider)."
+          }
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/notifications/{{notificationId}}/read"
+          }
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/notifications/read-all"
+          }
+        }
+      ]
+    }
+  ]
+}
