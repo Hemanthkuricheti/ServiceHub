@@ -176,6 +176,21 @@ Valid `type` values for document upload: `aadharCard`, `panCard` (both required 
 
 A ready-to-import Postman collection is at [`docs/postman_collection.json`](docs/postman_collection.json).
 
+## Deployment
+
+Deploys to [Render](https://render.com) via the included [`render.yaml`](render.yaml) Blueprint — backend as a Docker web service, frontend as a static site (Vite build, served from Render's CDN with an SPA rewrite rule so client-side routes work).
+
+1. Push this repo to GitHub (already done if you're reading this from there).
+2. On Render: **New +** → **Blueprint** → connect this repo. Render reads `render.yaml` and proposes both services.
+3. Fill in the env vars marked "from environment" / left blank in the Blueprint - at minimum `MONGO_URI` on the backend (a `JWT_SECRET` is auto-generated for you). `GEMINI_API_KEY`, `GOOGLE_CLIENT_ID`, `SENDGRID_API_KEY`/`EMAIL_FROM`, and `VITE_GOOGLE_CLIENT_ID` are all optional - leave blank to skip those features, exactly like running locally.
+4. Deploy. Once both services are live, note their URLs (`https://<name>.onrender.com`, using the service names you gave them).
+5. Go back into each service's **Environment** tab and fill in the two cross-references Render can't know ahead of time:
+   - Backend's `CLIENT_URL` → the frontend's URL
+   - Frontend's `VITE_API_URL` → the backend's URL + `/api`
+6. Save. The backend picks up the change immediately; the frontend needs a **Manual Deploy** to rebuild, since `VITE_*` values are baked in at build time, not read at runtime.
+
+**Known limitation of the free tier:** the backend's disk is ephemeral, so files saved by `multer` (profile photos, verification documents) are lost whenever the free instance restarts, redeploys, or spins down from inactivity. Fine for demoing the app; for real persistence, swap `backend/src/middleware/upload.middleware.js` to a cloud storage provider (S3, Cloudinary, etc.) instead of local disk.
+
 ## Notable Design Decisions
 
 - **Single `User` model** with an embedded `providerProfile` subdocument — a provider's profile lives on their own user record, avoiding an extra join for the most common query (fetch my profile / list all providers).
