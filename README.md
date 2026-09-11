@@ -206,5 +206,24 @@ File uploads (profile photos, verification documents) go straight to Cloudinary 
 - [x] README.md (this file)
 - [x] `.env.example` for both `backend/` and `frontend/`
 - [x] Postman API collection (`docs/postman_collection.json`)
-- [ ] Screenshots — add to `docs/screenshots/` once you've run the app
+- [x] Screenshots (`docs/screenshots/`) — see below
 - [ ] 3–5 minute demo video — record after testing the full flow end-to-end
+
+## Screenshots
+
+| | |
+|---|---|
+| Landing page | ![Landing page](docs/screenshots/01-landing-page.png) |
+| Login (with Google Sign-In) | ![Login](docs/screenshots/03-login.png) |
+| Registration wizard - AI skill suggestions | ![Register - AI suggest](docs/screenshots/06-register-services-ai-suggest.png) |
+| Provider dashboard | ![Provider dashboard](docs/screenshots/07-provider-dashboard.png) |
+| Service details (categories, skills, location) | ![Service details](docs/screenshots/08-provider-service-details.png) |
+| Document upload + AI verification | ![Documents](docs/screenshots/09-provider-documents.png) |
+| Application status timeline | ![Application status](docs/screenshots/10-provider-application-status.png) |
+| In-app notifications | ![Notifications](docs/screenshots/12-notifications-dropdown.png) |
+| Admin dashboard (stats + charts) | ![Admin dashboard](docs/screenshots/13-admin-dashboard.png) |
+| Admin providers list (search/filter) | ![Admin providers list](docs/screenshots/14-admin-providers-list.png) |
+| Admin provider detail (approve/reject) | ![Admin provider detail](docs/screenshots/15-admin-provider-detail.png) |
+| Light mode | ![Admin dashboard light mode](docs/screenshots/16-admin-dashboard-light.png) |
+
+More in [`docs/screenshots/`](docs/screenshots/), including the full registration wizard and provider profile pages.
