@@ -13,6 +13,9 @@ import DocumentUpload from '../components/provider/DocumentUpload';
 import CategoryPicker from '../components/provider/CategoryPicker';
 import GoogleAuthButton from '../components/common/GoogleAuthButton';
 import { updateProfileApi, submitApplicationApi } from '../api/provider.api';
+import { suggestCategoriesApi } from '../api/ai.api';
+import { SERVICE_CATEGORIES } from '../utils/constants';
+import { SERVICE_ICONS } from '../utils/serviceIcons';
 
 const STEPS = ['Basic Info', 'Services', 'Location', 'Documents'];
 
@@ -95,12 +98,37 @@ const BasicInfoStep = ({ onNext, loading }) => {
 
 const ServicesStep = ({ data, onChange, onNext, onBack }) => {
   const [skillInput, setSkillInput] = useState('');
+  const [workDescription, setWorkDescription] = useState('');
+  const [suggestCategory, setSuggestCategory] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
 
   const toggleCategory = (category) => {
     const next = data.categories.includes(category)
       ? data.categories.filter((c) => c !== category)
       : [...data.categories, category];
     onChange({ ...data, categories: next });
+  };
+
+  const handleAiSuggest = async () => {
+    if (!workDescription.trim() && !suggestCategory) {
+      toast.error('Describe your work or pick a category first');
+      return;
+    }
+    setSuggesting(true);
+    try {
+      const { data: result } = await suggestCategoriesApi(workDescription.trim(), suggestCategory || undefined);
+      const { categories: suggestedCategories, skills: suggestedSkills } = result.data;
+      onChange({
+        ...data,
+        categories: [...new Set([...data.categories, ...suggestedCategories])],
+        skills: [...new Set([...data.skills, ...suggestedSkills])],
+      });
+      toast.success('Suggestions added below — review and adjust as needed');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'AI suggestion failed');
+    } finally {
+      setSuggesting(false);
+    }
   };
 
   const addSkill = (e) => {
@@ -128,6 +156,47 @@ const ServicesStep = ({ data, onChange, onNext, onBack }) => {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="rounded-lg border border-dashed border-primary-200 bg-primary-50/40 p-3 dark:border-primary-500/30 dark:bg-primary-500/5">
+        <h3 className="mb-1 text-sm font-semibold text-gray-900 dark:text-gray-100">✨ Suggest with AI</h3>
+        <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+          Describe what you do, optionally narrow it to a category, and AI will suggest skills below.
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            value={workDescription}
+            onChange={(e) => setWorkDescription(e.target.value)}
+            placeholder="e.g. I fix leaky pipes and install water heaters"
+            className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+          />
+          <div className="relative">
+            {suggestCategory && (
+              <img
+                src={SERVICE_ICONS[suggestCategory]}
+                alt=""
+                className="pointer-events-none absolute left-2 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full object-cover"
+              />
+            )}
+            <select
+              value={suggestCategory}
+              onChange={(e) => setSuggestCategory(e.target.value)}
+              className={`rounded-lg border border-gray-300 bg-white py-2 pr-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 ${
+                suggestCategory ? 'pl-8' : 'pl-3'
+              }`}
+            >
+              <option value="">Any category</option>
+              {SERVICE_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button type="button" variant="secondary" loading={suggesting} onClick={handleAiSuggest}>
+            Suggest
+          </Button>
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Select Service Categories</h3>
         <CategoryPicker selected={data.categories} onToggle={toggleCategory} />
@@ -303,7 +372,7 @@ const Register = () => {
             data={servicesData}
             onChange={setServicesData}
             onNext={() => setStep(3)}
-            onBack={() => setStep(2)}
+            onBack={() => setStep(1)}
           />
         )}
         {step === 3 && (

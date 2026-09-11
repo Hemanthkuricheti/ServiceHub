@@ -15,6 +15,11 @@ const GoogleAuthButton = ({ onAuthenticated }) => {
       toast.success(`Welcome, ${user.name}!`);
       if (onAuthenticated) {
         onAuthenticated(user);
+      } else if (user.role !== 'admin' && user.providerProfile?.status === 'incomplete') {
+        // A brand-new (or never-finished) provider profile - send them straight
+        // to Service Details instead of the bare dashboard overview, so it's
+        // obvious what to do next.
+        navigate('/dashboard/services');
       } else {
         navigate(user.role === 'admin' ? '/admin' : '/dashboard');
       }

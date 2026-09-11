@@ -25,7 +25,11 @@ const Login = () => {
     try {
       const user = await login(values);
       toast.success('Welcome back!');
-      navigate(user.role === 'admin' ? '/admin' : '/dashboard');
+      if (user.role !== 'admin' && user.providerProfile?.status === 'incomplete') {
+        navigate('/dashboard/services');
+      } else {
+        navigate(user.role === 'admin' ? '/admin' : '/dashboard');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {
