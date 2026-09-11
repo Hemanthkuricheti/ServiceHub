@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Menu, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { FILE_BASE_URL } from '../../utils/constants';
+import { resolveFileUrl } from '../../utils/constants';
 import ThemeToggle from '../common/ThemeToggle';
 import NotificationBell from './NotificationBell';
 
@@ -38,7 +38,7 @@ const Topbar = ({ title, onMenuClick }) => {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-sm font-semibold text-primary-700 dark:bg-primary-500/15 dark:text-primary-400">
             {profilePhoto ? (
               <img
-                src={`${FILE_BASE_URL}${profilePhoto}`}
+                src={resolveFileUrl(profilePhoto)}
                 alt={user.name}
                 className="h-full w-full object-cover"
               />

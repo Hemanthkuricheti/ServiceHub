@@ -8,7 +8,7 @@ import BackLink from '../../components/common/BackLink';
 import { useAuth } from '../../context/AuthContext';
 import { useProviderProfile } from '../../context/ProviderProfileContext';
 import { updateProfileApi, uploadPhotoApi, removePhotoApi } from '../../api/provider.api';
-import { FILE_BASE_URL } from '../../utils/constants';
+import { resolveFileUrl } from '../../utils/constants';
 
 const ProfilePage = () => {
   const { user, updateUser } = useAuth();
@@ -98,7 +98,7 @@ const ProfilePage = () => {
           )}
           <div className="flex items-center gap-4">
             <ClickableAvatar
-              src={profile.profilePhoto ? `${FILE_BASE_URL}${profile.profilePhoto}` : null}
+              src={profile.profilePhoto ? resolveFileUrl(profile.profilePhoto) : null}
             />
             <div className="flex items-center gap-3">
               <input ref={photoInputRef} type="file" accept="image/*" hidden onChange={handlePhotoChange} />

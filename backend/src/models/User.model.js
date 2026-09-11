@@ -6,6 +6,7 @@ const documentSchema = new mongoose.Schema({
   type: { type: String, default: 'other' },
   name: { type: String, required: true },
   fileUrl: { type: String, required: true },
+  publicId: { type: String, default: '' },
   uploadedAt: { type: Date, default: Date.now },
 });
 
@@ -27,6 +28,7 @@ const providerProfileSchema = new mongoose.Schema(
     experienceYears: { type: Number, min: 0, default: 0 },
     location: { type: locationSchema, default: () => ({}) },
     profilePhoto: { type: String, default: '' },
+    profilePhotoPublicId: { type: String, default: '' },
     documents: [documentSchema],
     status: {
       type: String,

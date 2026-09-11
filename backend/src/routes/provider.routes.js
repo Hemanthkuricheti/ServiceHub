@@ -118,7 +118,7 @@ router.put('/profile', updateProfileValidator, validate, updateProfile);
  *                 data:
  *                   type: object
  *                   properties:
- *                     profilePhoto: { type: string, example: /uploads/1234567890-photo.jpg }
+ *                     profilePhoto: { type: string, example: "https://res.cloudinary.com/demo/image/upload/v1/servicehub/profile-photos/xyz789.jpg" }
  */
 router.post('/profile/photo', upload.single('photo'), uploadProfilePhoto);
 

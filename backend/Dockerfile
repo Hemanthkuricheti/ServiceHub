@@ -7,8 +7,6 @@ RUN npm ci --omit=dev
 
 COPY src ./src
 
-RUN mkdir -p uploads
-
 ENV NODE_ENV=production
 EXPOSE 5000
 

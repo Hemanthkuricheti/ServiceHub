@@ -9,7 +9,7 @@ import Modal from '../../components/common/Modal';
 import ClickableAvatar from '../../components/common/ClickableAvatar';
 import { getProviderByIdApi, approveProviderApi, rejectProviderApi } from '../../api/admin.api';
 import { getApplicationSummaryApi, draftRejectionApi } from '../../api/ai.api';
-import { FILE_BASE_URL, DOCUMENT_TYPES } from '../../utils/constants';
+import { resolveFileUrl, DOCUMENT_TYPES } from '../../utils/constants';
 
 const RECOMMENDATION_STYLES = {
   approve: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
@@ -117,7 +117,7 @@ const ProviderDetail = () => {
         <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center gap-4">
             <ClickableAvatar
-              src={profile.profilePhoto ? `${FILE_BASE_URL}${profile.profilePhoto}` : null}
+              src={profile.profilePhoto ? resolveFileUrl(profile.profilePhoto) : null}
               alt={`${provider.name}'s profile photo`}
             />
             <div>
@@ -211,7 +211,7 @@ const ProviderDetail = () => {
                   </span>
                   {doc ? (
                     <a
-                      href={`${FILE_BASE_URL}${doc.fileUrl}`}
+                      href={resolveFileUrl(doc.fileUrl)}
                       target="_blank"
                       rel="noreferrer"
                       className="text-primary-600 hover:underline dark:text-primary-400"
@@ -231,7 +231,7 @@ const ProviderDetail = () => {
             .map((doc) => (
               <div key={doc._id} className="mt-2 border-t border-gray-100 pt-2 text-sm dark:border-gray-700">
                 <a
-                  href={`${FILE_BASE_URL}${doc.fileUrl}`}
+                  href={resolveFileUrl(doc.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-primary-600 hover:underline dark:text-primary-400"

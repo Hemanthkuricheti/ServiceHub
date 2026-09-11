@@ -33,6 +33,14 @@ export const FILE_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:
   ''
 );
 
+// New uploads are full Cloudinary URLs; older records saved before that
+// migration may still have a relative "/uploads/..." path from local disk
+// storage, which no longer resolves (kept only so old data doesn't crash).
+export const resolveFileUrl = (fileUrl) => {
+  if (!fileUrl) return '';
+  return /^https?:\/\//.test(fileUrl) ? fileUrl : `${FILE_BASE_URL}${fileUrl}`;
+};
+
 export const DOCUMENT_TYPES = [
   { key: 'aadharCard', label: 'Aadhar Card', required: true },
   { key: 'panCard', label: 'PAN Card', required: true },

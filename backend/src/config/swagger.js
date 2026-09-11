@@ -48,7 +48,7 @@ const definition = {
           _id: { type: 'string' },
           type: { type: 'string', example: 'aadharCard' },
           name: { type: 'string', example: 'aadhar.pdf' },
-          fileUrl: { type: 'string', example: '/uploads/1234567890-111222333.pdf' },
+          fileUrl: { type: 'string', example: 'https://res.cloudinary.com/demo/image/upload/v1/servicehub/documents/abc123.pdf' },
           uploadedAt: { type: 'string', format: 'date-time' },
         },
       },
@@ -60,7 +60,7 @@ const definition = {
           skills: { type: 'array', items: { type: 'string' }, example: ['Pipe Fitting', 'Wiring'] },
           experienceYears: { type: 'number', example: 5 },
           location: { $ref: '#/components/schemas/Location' },
-          profilePhoto: { type: 'string', example: '/uploads/1234567890-photo.jpg' },
+          profilePhoto: { type: 'string', example: 'https://res.cloudinary.com/demo/image/upload/v1/servicehub/profile-photos/xyz789.jpg' },
           documents: { type: 'array', items: { $ref: '#/components/schemas/Document' } },
           status: {
             type: 'string',

@@ -4,6 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { APPLICATION_STATUS, DOCUMENT_TYPES } from '../constants/index.js';
 import { deleteUploadedFile } from '../utils/fileStorage.js';
+import { uploadBufferToCloudinary } from '../config/cloudinary.js';
 import { sendApplicationSubmittedEmail, notifyAdminsOfNewSubmission } from '../services/email.service.js';
 import { notifyProviderSubmitted, notifyAdminsOfSubmission } from '../services/notification.service.js';
 
@@ -94,10 +95,15 @@ export const uploadProfilePhoto = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, 'No file uploaded');
 
   const user = await User.findById(req.user._id);
-  const previousPhoto = user.providerProfile.profilePhoto;
-  user.providerProfile.profilePhoto = `/uploads/${req.file.filename}`;
+  const previousPublicId = user.providerProfile.profilePhotoPublicId;
+
+  const { url, publicId } = await uploadBufferToCloudinary(req.file.buffer, {
+    folder: 'servicehub/profile-photos',
+  });
+  user.providerProfile.profilePhoto = url;
+  user.providerProfile.profilePhotoPublicId = publicId;
   await user.save();
-  deleteUploadedFile(previousPhoto);
+  deleteUploadedFile(previousPublicId);
   res.json(
     new ApiResponse(200, { profilePhoto: user.providerProfile.profilePhoto }, 'Profile photo uploaded')
   );
@@ -108,9 +114,11 @@ export const removeProfilePhoto = asyncHandler(async (req, res) => {
   const previousPhoto = user.providerProfile.profilePhoto;
   if (!previousPhoto) throw new ApiError(400, 'No profile photo to remove');
 
+  const previousPublicId = user.providerProfile.profilePhotoPublicId;
   user.providerProfile.profilePhoto = '';
+  user.providerProfile.profilePhotoPublicId = '';
   await user.save();
-  deleteUploadedFile(previousPhoto);
+  deleteUploadedFile(previousPublicId);
   res.json(new ApiResponse(200, { profilePhoto: '' }, 'Profile photo removed'));
 });
 
@@ -126,15 +134,20 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     throw new ApiError(403, 'Approved applications cannot be edited');
   }
 
+  const { url, publicId } = await uploadBufferToCloudinary(req.file.buffer, {
+    folder: 'servicehub/documents',
+  });
+
   const existing = user.providerProfile.documents.find((doc) => doc.type === type);
   user.providerProfile.documents = user.providerProfile.documents.filter((doc) => doc.type !== type);
   user.providerProfile.documents.push({
     type,
     name: req.file.originalname,
-    fileUrl: `/uploads/${req.file.filename}`,
+    fileUrl: url,
+    publicId,
   });
   await user.save();
-  deleteUploadedFile(existing?.fileUrl);
+  deleteUploadedFile(existing?.publicId);
   res.json(
     new ApiResponse(200, { documents: user.providerProfile.documents }, `${docType.label} uploaded`)
   );
@@ -153,7 +166,7 @@ export const removeDocument = asyncHandler(async (req, res) => {
     (doc) => doc._id.toString() !== req.params.docId
   );
   await user.save();
-  deleteUploadedFile(removed?.fileUrl);
+  deleteUploadedFile(removed?.publicId);
   res.json(new ApiResponse(200, { documents: user.providerProfile.documents }, 'Document removed'));
 });
 

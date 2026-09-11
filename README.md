@@ -5,7 +5,7 @@ A MERN stack application where service providers register, complete their profil
 ## Tech Stack
 
 - **Frontend:** React (Vite), React Router, Tailwind CSS, React Hook Form, Axios, React Hot Toast, Recharts (admin dashboard charts), Lucide React (icons)
-- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT Authentication, Multer (file uploads), express-validator
+- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT Authentication, Multer + Cloudinary (file uploads), express-validator
 - **AI (optional):** Google Gemini API (`gemini-3.6-flash`) with structured JSON outputs (Zod → JSON Schema) for admin-assist and provider-assist features
 
 ## Folder Structure
@@ -25,7 +25,6 @@ Service_Provider_Onboarding_Portal/
 │   │   ├── validators/     # express-validator rule sets
 │   │   ├── app.js
 │   │   └── server.js
-│   └── uploads/            # Uploaded files (gitignored)
 ├── frontend/               # React (Vite) frontend
 │   └── src/
 │       ├── api/            # Axios calls grouped by feature
@@ -43,15 +42,18 @@ Service_Provider_Onboarding_Portal/
 ### Prerequisites
 - Node.js 18+
 - A running MongoDB instance (local or Atlas)
+- A free [Cloudinary](https://cloudinary.com) account (for file uploads — see below)
 
 ### 1. Backend Setup
 
 ```bash
 cd backend
 npm install
-cp .env.example .env   # then edit MONGO_URI / JWT_SECRET as needed
+cp .env.example .env   # then edit MONGO_URI / JWT_SECRET / CLOUDINARY_* as needed
 npm run dev
 ```
+
+Profile photos and verification documents upload straight to Cloudinary rather than this server's own disk, so they survive restarts and redeploys even on hosts with no persistent disk. Sign up free at [cloudinary.com](https://cloudinary.com) and copy the three values from your Dashboard home page into `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` — uploads return a `503` until these are set.
 
 The API runs on `http://localhost:5000` by default. Health check: `GET /api/health`.
 
@@ -82,7 +84,7 @@ Instead of steps 1–2, with Docker Desktop running and `backend/.env` filled in
 docker compose up --build
 ```
 
-This builds and runs both services: the backend on `http://localhost:5000` and the frontend (a production Vite build served by nginx) on `http://localhost:5173`. Uploaded files persist on your host at `backend/uploads/` via a volume mount. Rebuild after changing frontend `.env` values (`VITE_*` vars are baked in at build time) with `docker compose up --build`; for backend-only code changes, `docker compose restart backend` is enough after a rebuild.
+This builds and runs both services: the backend on `http://localhost:5000` and the frontend (a production Vite build served by nginx) on `http://localhost:5173`. Uploaded files go to Cloudinary, not a local volume, so nothing extra is needed for them to persist. Rebuild after changing frontend `.env` values (`VITE_*` vars are baked in at build time) with `docker compose up --build`; for backend-only code changes, `docker compose restart backend` is enough after a rebuild.
 
 ### 4. Try it out
 1. Open `/` for the landing page, then **Register as Provider** — a 4-step wizard (Basic Info → Services → Location → Documents) that creates the account, saves profile details, and lets you upload documents before submitting.
@@ -189,7 +191,7 @@ Deploys to [Render](https://render.com) via the included [`render.yaml`](render.
    - Frontend's `VITE_API_URL` → the backend's URL + `/api`
 6. Save. The backend picks up the change immediately; the frontend needs a **Manual Deploy** to rebuild, since `VITE_*` values are baked in at build time, not read at runtime.
 
-**Known limitation of the free tier:** the backend's disk is ephemeral, so files saved by `multer` (profile photos, verification documents) are lost whenever the free instance restarts, redeploys, or spins down from inactivity. Fine for demoing the app; for real persistence, swap `backend/src/middleware/upload.middleware.js` to a cloud storage provider (S3, Cloudinary, etc.) instead of local disk.
+File uploads (profile photos, verification documents) go straight to Cloudinary rather than the backend's own disk, so they persist normally across restarts and redeploys - the free tier's ephemeral filesystem isn't a concern for them. Remember to set `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` in the backend service's environment variables on Render.
 
 ## Notable Design Decisions
 

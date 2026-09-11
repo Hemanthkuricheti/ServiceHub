@@ -1,6 +1,4 @@
-import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import User from '../models/User.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
@@ -12,9 +10,6 @@ import {
   suggestCategoriesAndSkills,
   verifyDocument,
 } from '../services/ai.service.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadDir = path.join(__dirname, '..', '..', 'uploads');
 
 const MIME_BY_EXT = {
   '.jpg': 'image/jpeg',
@@ -45,10 +40,11 @@ export const verifyProviderDocument = asyncHandler(async (req, res) => {
   const mediaType = MIME_BY_EXT[ext];
   if (!mediaType) throw new ApiError(400, 'Unsupported file type for AI verification');
 
-  const filePath = path.join(uploadDir, path.basename(doc.fileUrl));
-  if (!fs.existsSync(filePath)) throw new ApiError(404, 'File no longer exists on the server');
+  const fileResponse = await fetch(doc.fileUrl);
+  if (!fileResponse.ok) throw new ApiError(404, 'File no longer exists in storage');
+  const arrayBuffer = await fileResponse.arrayBuffer();
+  const base64Data = Buffer.from(arrayBuffer).toString('base64');
 
-  const base64Data = fs.readFileSync(filePath).toString('base64');
   const result = await verifyDocument({ label, base64Data, mediaType, providerName: req.user.name });
   res.json(new ApiResponse(200, result));
 });

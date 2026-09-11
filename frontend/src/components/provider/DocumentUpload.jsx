@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import Button from '../common/Button';
 import { uploadDocumentApi, removeDocumentApi } from '../../api/provider.api';
 import { verifyDocumentApi } from '../../api/ai.api';
-import { FILE_BASE_URL, DOCUMENT_TYPES } from '../../utils/constants';
+import { resolveFileUrl, DOCUMENT_TYPES } from '../../utils/constants';
 
 const LEGIBILITY_STYLES = {
   clear: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
@@ -73,7 +73,7 @@ const DocumentSlot = ({ config, doc, onUpload, onRemove, onVerify, verifyResult,
           </p>
           {doc ? (
             <a
-              href={`${FILE_BASE_URL}${doc.fileUrl}`}
+              href={resolveFileUrl(doc.fileUrl)}
               target="_blank"
               rel="noreferrer"
               className="block truncate text-xs text-primary-600 hover:underline dark:text-primary-400"
@@ -202,7 +202,7 @@ const DocumentUpload = ({ profile, onProfileChange, readOnly }) => {
                   className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-gray-700/50"
                 >
                   <a
-                    href={`${FILE_BASE_URL}${doc.fileUrl}`}
+                    href={resolveFileUrl(doc.fileUrl)}
                     target="_blank"
                     rel="noreferrer"
                     className="text-primary-600 hover:underline dark:text-primary-400"
